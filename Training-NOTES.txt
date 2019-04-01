@@ -1,0 +1,367 @@
+Installation
+============
+Install 'Virtual Box'
+Install 'Vagrant'
+Download 'Cmder' and unzip it in a folder.
+
+Move to the folder where you unzipped 'Cmder' and start 'cmder'
+by clicking on its icon.
+
+Create a new-directory and change over to that directory.
+
+Check the version of vagrant
+;\ vagrant --version
+
+Now, install the linux box
+;\ vagrant  box add  centos/7
+
+This will download the Linux box.
+
+;\ vagrant init centos/7	# Done for the first time only
+This create a file by name 'Vagrantfile' in the current
+directory.
+
+;\ vagrant up			
+The virtual machine should get started.
+
+;\ vagrant ssh-config
+Displays the configuration for the virtual machine.
+
+Connecting to Virtual Linux Box
+===============================
+To get connected to the Virtual Box 
+
+ssh  <user_name>@<IP-Addr/Hostname> -p <Port_No> -i <private_key_file>
+
+NOTE: In Vagrant to check for the configuation issue the following
+      command.
+
+vagrant  ssh-config
+
+The configuation details will be displayed.
+
+Install Ansible
+===============
+To install Ansible at your system prompt:
+
+$ sudo  yum  install -y  ansible
+
+To check the version of ansible
+
+$ ansible --version
+
+Ansible Configuration
+=====================
+By default 'ansible' looks for a configuation file in the 
+following directory: /etc/ansible/ansible.cfg
+
+However, we can have our own ansible config file in any
+directory.  /home/rajesh/ansible.cfg
+
+OR it could even be in a sub-directory.
+
+	   /home/rajesh/sg/ansible.cfg
+
+The /etc/ansible/ansible.cfg is called the Global Configuration
+file. It is provided by ANSIBLE and most of the options are 
+commented.
+
+We need to look into two groups [defaults] and [privilege_escalation]
+group and change the parameters as per needs.
+
+The order in which ANSIBLE uses the configuration files is as
+follows:
+1) If we have a config file in the current directory it will
+   use that or 
+2) It will use the default/global config file.
+
+
+Inventory File
+==============
+The default name of the inventory file is 'hosts'
+However, we can have any other name.
+
+Moreover the inventory file by default exits in the 
+/etc/ansible/hosts 
+
+NOTE: We can have both the configuation file and the 
+inventory file in our directory.
+
+The inventory file contains hostnames/ip-addresses.
+These can also be grouped.
+
+======================================================
+YAML
+====
+YAML - Ain't Markup Language
+
+Designed primarily for the representation of data
+structures such as lists and associative arrays.
+i.e LISTS like arrays	
+    KEY-VALUE pairs 'associative arrays'
+
+Optionally begins with THREE DASH. It represents
+the start of document marker and optionally 
+terminated by THREE DOTS to represent end of file
+marker.
+----------------------------------------------------
+NOTE: We can set the VI Editor config file as 
+      follows:
+
+      ~/.vimrc
+
+      autocmd FileType yaml setlocal ai ts=2 sw=2 et
+
+      ai -> Auto Indent
+      ts -> Tab Space
+      et -> Expand tabs
+      sw -> Into spaces
+
+NOTE: Install vim-enhanced features
+      yum install -y vim-enhanced
+----------------------------------------------------
+
+YAML Strings
+~~~~~~~~~~~~
+Do not require enclosing in quotes
+
+Dictionaries
+~~~~~~~~~~~~
+key: value
+
+Lists
+~~~~~
+A SINGLE DASH followed by the item
+
+Ex:
+---
+- colors:
+  - red
+  - green
+  - blue
+
+Can also be represented inline as follows:
+---
+fruits: [apple, banana, cherry]
+
+  
+Comment
+~~~~~~~
+# Char
+
+Verifying YAML Syntax
+---------------------
+We use Python to verify YAML syntax as follows:
+
+python -c 'import yaml, sys; print yaml.load(sys.stdin)' < myyaml.yml
+
+====================================================================
+Playbooks
+=========
+Text files written in YAML format
+Syntax is much easier to write and comprehend.
+
+Playbook contains PLAYS
+PLAYS serve to define a set of operations on a specify
+  set of managed hosts.
+  The operations are called TASKS
+
+Writing a Playbook
+------------------
+Look into the following attributes
+name - used to give a descriptive label to the play
+host - a set of managed hosts on which tasks are performed
+remote_user - The name of the remote user defined in the
+	Ansible config file for task execution
+Privilege Escalation attributes
+become - True/False			| Refer
+become_method - sudo			| ansible
+become_user - <privilege_user>		| config
+
+Tasks attribute
+tasks - The main component of the play
+
+Executing Playbook
+------------------
+ansible-playbook  <playbook_file>
+
+Syntax Verification
+-------------------
+ansible-playbook  --syntax-check <playbook_file>
+
+Executing a dry-run
+-------------------
+ansible-playbook  -C <playbook_file>
+
+Step-by-step Executing
+----------------------
+ansible-playbook  --step <playbook_file>
+
+==========================================================================
+Variables in Playbooks
+======================
+We can declare variables and call them in tasks
+Ex:
+- hosts: localhost
+  vars:
+     user: mukthar
+
+To reference a variable in a play, use the {{ var_name }}
+NOTE: When a var is used as the first element to start a
+      value, quotes are mandatory.
+
+Overriding Variables from Command Line
+--------------------------------------
+$ ansible-playbook  <host(s)>  <yml_file>  -e "var=value"
+
+Variables v/s Arrays
+--------------------
+user1_first_name: Tom
+user1_last_name: Moody
+user1_home_dir: /home/tmoody
+user2_first_name: Anil
+user2_last_name: Kapoor
+user2_home_dir: /home/akapoor
+
+Instead use Array as follows:
+
+users:
+   tmoody:
+      fname: Tom
+      lname: Moody
+      hdir: /home/tmoody
+   akapoor:
+      fname: Anil
+      lname: Kapoor
+      hdir: /home/akapoor
+
+To reference the array-elements
+users.tmoody.fname
+users.akapoor.hdir
+
+OR
+
+users['tmoody']['fname']
+
+Register Variables
+==================
+We can capture the output of a command using the
+'register' statement.
+
+
+==========================================================
+
+Blocks
+------
+Complex playbook may contain a long list of tasks.
+Blocks offer an alternative to task organization.
+
+Conditionls
+===========
+Ansible can use conditionls to execute tasks.
+Ex: Determine the available memory on the host before
+    installing.
+    Determine the installation of the package before
+    starting its service.
+
+Playbook variables, registered variables, Ansible
+facts can all be tested with conditionals
+
+Relational operators, String comparision operators and
+Booleans are available for conditionals.
+
+Conditionals can be combined with 'and' and 'or' keywords
+
+Handlers
+========
+Ansible modules are designed to be IDEMPOTENT.
+Sometimes when a task makes a change to the system, a
+further task may need to be run.
+
+Ex: Change to a service's config file may require that
+    service to be restarted.
+
+HANDLERS are tasks that respond to a notification
+triggered by another task.
+
+Handlers can be seen as inactive tasks, that only get
+triggered when explicitly invoked by a 'notify' statement
+
+NOTE: Ansible notifies handlers only if the task acquires
+      the CHANGED status.
+
+Tags
+====
+For very long playbooks it is useful to run sub-sets of 
+the tasks in the playbook.
+This is achived by 'tags' keyword.
+
+When playbooks are tagged, the --tags option can be used
+with 'ansible-playbook' command execute specific tagged
+plays.
+
+NOTE: When we tag a 'include' all tasks they define are
+      also tagged.
+
+ansible-playbook  <playbook.yml>  --tags  'tag_name'
+
+Handling Errors
+===============
+Ansible evaluates the return codes of module or commands
+to determine the task succeeded or failed.
+
+When a task fails, Ansible abort the play, skipping
+subsequent tasks.
+
+To continue execution if the task fails, Ansile has a
+number of options.
+
+[a] Ignore the failed task -> ignore_errors: yes
+[b] Force execution of handlers -> force_handlers: yes
+[c] Using 'block' and 'rescue' and 'always' keyword
+
+Block Error Handling
+--------------------
+Block allow for logical grouping.
+
+* block	: Defines the main task to run
+* rescue: Defines the tasks that will be run if the 
+	  tasks defined in 'block' fails
+* always: Defines the tasks that will always run 
+	  idependent of the success or failure of
+	  tasks in 'block' or 'rescue'
+Roles
+=====
+Ansible 'roles' allow us to organize playbooks into
+seperate, smaller playbooks and files.
+
+Provides a way to load tasks, handlers and variables
+from external files.
+
+Roles are general purpose and can be reused.
+
+Benefits:
+* Roles group content, allowing easy sharing of code.
+* Roles can be written that define the essential
+  elements of a large system: web server, db server,
+  git repo or other purposes
+* Roles make large project more manageable
+* Rolse can be developed in parallel. Team work.
+
+The 'ansible-galaxy' command-line tool can be used to
+search, display info, install, list, remove or init
+roles
+
+Ex: $ asible-galaxy search 'install git'
+    $ asible-galaxy info alikins.git
+
+The 'ansible-galaxy' install sub-command downloads a
+role from Ansible galaxy and installs it locally on the
+control node.
+Default location: /etc/ansible/roles
+Override: Using 'role_path' variable or  -p DIR option
+
+
+
+
+

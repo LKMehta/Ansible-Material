@@ -1,0 +1,13 @@
+please keep in mind that the public key for root has to be on the server you want to reach as well, not only the public key from your non-root-user. Otherwise you get the error message above as well.
+
+SOLUTION
+========
+As everybody else has already said you need to edit /etc/ssh/sshd_config and change PasswordAuthentication no to PasswordAuthentication yes
+
+sudo systemctl restart sshd;
+
+
+https://stackoverflow.com/questions/36300446/ssh-permission-denied-publickey-gssapi-with-mic
+
+
+

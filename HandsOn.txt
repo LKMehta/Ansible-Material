@@ -1,0 +1,252 @@
+Practice-1
+==========
+1. Install Virtual Box on your system
+
+2. Install Vagrant on your system
+
+4. Install 'cmder' the Commander Utility on your system
+
+3. Choose the 'Centos/7' Vargrant box and perform the installation
+
+4. Verify that you are able to establish SSH connection to the Centos/7 box.
+
+5. Verify theat the prerequiste version of Python is installed on the system or
+   not.
+
+6. Install Ansible on the system 
+
+7. Verify that you are able to establish SSH connection to the Centos/7 box.
+   Check the version of Ansible
+
+8. Observe the default Ansible configuration file.
+
+9. Observe the default Inventory file.
+
+10. Exit the vagrant box.
+
+Practice-2
+==========
+1. Establish SSH connection to your Centos/7 box
+
+2. Create an empty ansible.cfg file to your HOME directory.
+   Check the version of Ansible now.
+   Record your observation
+
+3. Make the 'playbooks' directory and create an empty 'ansible.cfg' file
+   in the 'playbooks' directory.
+
+   Check the version of Ansible now.
+   Record your observation
+
+   What do you infer from the above THREE tasks.
+
+4. Create the inventory file by name 'theHosts' in the 'playbooks'
+   directory
+
+   Let your sample inventory file look as shown below:
+
+   servera
+   serverb
+   workstation
+
+   [www]
+   servera
+   serverb
+
+   [db]
+   servera
+
+   [testing]
+   serverb
+   workstation
+
+   [local]
+   localhost
+
+   NOTE: You need to modify the [defaults] and the 
+   [privilege_escalation]
+   group with appropriate key-value pairs in the 'ansible.cfg' file
+
+5. Verify that the new configuration setting is in effect by 
+   executing the 'ansible' command with --list-hosts option
+
+6. Set the 'ansible.cfg' in the 'playbooks' directory as follows:
+   
+   [defaults]
+   inventory   = hosts
+   remote_user = vagrant
+
+   [privilege_escalation]
+   become=True
+   become_method=sudo
+   become_user=root
+   become_ask_pass=False
+
+7. Using the 'ping' module check if you are able to connect to 
+   the 'localhost' machine.
+
+Practice-3
+==========
+Writing and executing playbooks.
+
+1. Write a playbook which will enable us to remove a 
+   user.
+   Name the playbook as 'deluser.yml'
+
+   * Use the variable in this playbook.
+   * HINT: The 'user' module should be used.
+   * Execute the playbook and check the /etc/passwd
+     file
+
+2. Execute the above playbook. i.e. 'deluser.yml'
+   which will enable us to specify user name at
+   command prompt.
+
+   NOTE: Use -e flag with 'ansible-playbook'
+
+3. Write a playbook by name 'motd.yml' which will enable
+   the user to place a message in the /etc/motd file.
+
+   The 'motd' file is actually 'Message of the day' file
+   * Use the 'copy' module to add contents to the file
+     as: "Ansible Playbook Rock!\n"
+
+   * Execute the playbook.
+
+   * Check the contents of the /etc/motd file now.
+
+4. Write a playbook by name 'httpd.yml' which should do
+   the following tasks:
+
+   * Install Apache Web Server.
+     HINT: Package name is 'httpd'
+   * Start the Apache Web Server service
+
+   * Execute the playbook and check if the Web Server
+     service is running or not.
+
+   * Stop the Web Server service from the command prompt
+
+   * View the Apache Web Server configuration file and
+     observe the 'DocumentRoot' directive.
+     That is the place where the Web Pages need to 
+     installed.
+
+5. Enhance the 'httpd.yml' playbook which will have a
+   task to add content to 'index.html' file in the
+   Document Root directory.
+
+   * Use the 'lineinfile' module to do this task.
+   * The content are "Hello from <ansible_hostname>"
+     where <ansible_hostname> is hostname of the 
+     machine where the playbook is being executed.
+
+   * View the content of the file 'index.html'
+
+6. Create a playbook by name 'access.yml' which will
+   check for the exitence of the file 
+   http://localhost/index.html
+
+   If the URL is accessable, it creates a file by name
+   'access.html' with the content "I am ACCESSABLE"
+   otherwise creates 'notaccess.html' with the content
+   "I am NOT ACCESSABLE"
+
+   HINT: Use the 'block' and 'rescue' attributes
+   NOTE: Use the 'uri' module to check for the URL
+
+7. Create a playbook by name 'hostinfo.yml' which will
+   store host system information in a file by name
+   /tmp/infohost.txt
+
+   It should have the following host details:
+   * Host name
+   * IP Address
+   * OS Family info
+   * Packaging Manager info
+   etc.
+
+Practice-4
+==========
+Manging Inclusions
+------------------
+1. Let's orgranize our playbook.
+
+   * Create a directory by name 'project'
+   * Copy the 'ansible.cfg' and inventory file to the 'project'
+   * Create two more sub-directories by name 'vars' and 'tasks'
+
+2. Define the variables in the file 'theVars.yml' in the vars
+   directory.
+   * It should have variables to specify the name of the
+     packages to install
+   * It should have variable to specify the name of the service
+     to work with
+   * It should have varible to specify the state of the service
+3. Define the tasks in the file 'theTasks.yml' in the 'tasks'
+   directory.
+   * Define the task to install the package
+   * Define the task to start the service.
+   NOTE: Use the variables which are defined in the file
+	 'vars/theVars.yml' file
+4. Now, create a 'main.yml' file in the project directory to 
+   include the variables declared file and tasks defined file.
+   * A task to include the variables file.
+   * A task to include the tasks file.
+   * Finally, add a task to create 'index.html' for the web
+     server using the 'copy' module.
+   * Using Ansible facts, write into the index.html file the
+     <ansible_fqdn> domain name and date & time stamp.
+   * Execute the 'main.yml' playbook.
+   * Test the deployment.
+
+Conditionals
+------------
+5. Write a playbook to restart a service depending on whether
+   another service is active or in-active
+   * Name the playbook as 'chk_condition.yml'
+   * Check if Postfix Mail Transport Agent is active or not.
+     HINT: systemctl is-active postfix
+   * If Postfix Mail Transport Agent is in-active the task
+     fails. However, do not stop processing
+   * Save info the task in 'result' variable
+   * Evaluate the exit status of Postfix task, and if it is
+     ZERO( 0 ) restart the 'httpd' service.
+Handlers
+--------
+6. Write a playbook to install the 'mariadb-server' and start
+   the 'mariadb' service.
+   * Use handlers to notify the start of the service.
+Tags
+----
+7. Write a playbook by name 'update_motd.yml' which will 
+   update the /etc/motd file depending on tags for the
+   dev->development or prod->production servers.
+
+   * Text could be "This is a development server" or
+   * Text could be "This is a production server" 
+   * Use 'copy' module to write to the file.
+   * Use tags to executed specific tagged plays.
+   * Execute the playbook and record your observation
+   
+Roles
+-----
+8. Write a playbook by name 'use_myenv_roles.yml'  which
+   enable us to use the roles 'myenv'
+
+   * Create a directory by name 'CustomeRoles'
+   * Copy the ansible config and inventory file to dir
+   * Using ansbile-galaxy create a directory structure
+     for our 'myenv' role
+   * In 'vars/main.yml' declare variables which will
+     enable me to install 'wget', 'tree' and 'vim-enhanced'
+     packages.
+   * In tasks/main.yml' write task(s) to install the 
+     packages.
+   * Include the 'myenv' roles in your playbook.
+   * Run and check the execution of the playbook.
+
+   
+
+
+
