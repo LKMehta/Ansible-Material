@@ -1,0 +1,679 @@
+DAY
+==================================================================================================
+
+Ansible: Tool used in Devops domain.
+
+Ansible uses YAML (yet another markup language).
+
+RedHat came out with a tool called Ansible.
+
+It is basically used to do configuration management, application deployments, provisioning, rolling upgrades - CD(continuous deployment), security and compliance, orchestartion  (Use Cases).
+
+Other tool similar to ansible are puppet, chef.
+
+Ansible is simple and easy as comparision to puppet, chef.
+SSH - secure shell
+require python 2.4 and greater version.
+On window platform it require (powershell 3.0 and above).
+
+open source - free, no money involved.
+
+Benefits
+-------------------
+1. efficient : Agentless, minimal setup
+2. Fast  : Easy to learn/to remember, simple declarative language (YAML)
+3. Scalable : Can managed thousands of nodes
+4. secure : SSH transport
+5. Large Community : thousands of roles on Ansible Galaxy
+
+Roles : combination of group of playbooks
+
+Key components
+--------------------
+1. Modules (Tools)
+2. Tasks - also called as plays
+3. Inventory - tells about the host machine that can be managed
+4. Plays
+5. Playbook (Plan)
+
+Installation
+----------------------------
+#enable epel repo
+yum install epel-release
+
+#install ansible
+yum install ansible
+
+only 2 package management tool in linux - rpm(redhat package management), yum(yellowdog updater modifier)
+
+rpm - it doesnot resolve dependencies (e.g. ansible require pyton 2.4 and above version)
+yum - it resolves dependencies. it is rpm based package manager.
+
+Modules 
+-------------------
+Bits of code copied to the target system. Executed to satisfy the task declaration.
+Customizable
+
+Common Module
+Cloud Module, Network Module, Clustering Module, Notification Module
+
+#is ansible available
+ansible --version
+
+#List all modules
+ansible-doc -l
+
+command "at" in linux helps in task scheduling
+
+#view module documentation
+ansible-doc <module name>
+
+e.g ansible-doc command
+
+any service end with d in  linux symbolize it is a daemon service
+
+modules commonly used are
+ping - check connection is established or not
+apt/yum
+copy
+file
+git
+service
+synchronize
+template
+uri
+user
+wait_for
+get_url
+
+------------------------------
+installation steps:
+------------------------------
+install virtual box
+install vagrant
+
+install cmder
+
+open cmder
+
+to check vagrant version -> vagrant -v
+
+www.vagrantup.com -> Find boxes -> Centos/7
+go to a directory where you want the VagrantFile to be created
+
+vagrant box add centos/7
+
+Observe "vagrantFile" is created, by running ls command
+
+vagrant init centos/7 (optional)
+
+vagrant up
+(the m/c (box) will be up & running)
+
+vagrant halt (it will turn off)
+
+vagrant ssh-config
+(to view the configuration of the box --> list the ssh configuration details)
+
+ssh vagrant@<IP Address> -p <port number> -i <identity file>
+(-p port number, -i include identity file)
+
+Now you will be able to work on centos machine.
+ssh is the command to connect to this machine.
+
+yum install -y ansible
+or
+sudo yum install -y ansible
+(without -y it will ask for confirmation)
+
+ansible --version
+
+redhat, centos, fedora all have similar type of flavour
+
+[vagrant@localhost ~]$
+vagrant -> username
+localhost -> host name
+~ -> refers the home directory
+pwd -> present working directory
+
+configuration file can exist in your choice location.
+
+in linux -> all config file are text file
+
+to see the config file
+ansible --version -> check config file path
+cat <config file path> -> used just to view the file content
+cat <config file path> | less
+less-> it is a paginator
+
+press spacebar(or up key) to go to next page, down key to come back to previous page, q to come out.
+
+inventory file exists in /etc/ansible/hosts
+
+usr represents -> user defined
+
+#  -> used to comment the line
+
+only super user and sudo user can install softwares
+
+privilege escalation -> e.g if manager is absent, tech lead will take the control
+
+paramiko -> is a module/plugin . To work on prior version of centos, it is mendatory that paramiko is working
+
+touch ansible.cfg --> create an empty file
+
+ansible --version --> config file destination file change
+
+[vagrant@localhost ~]$ mkdir sg
+[vagrant@localhost ~]$ cd sg
+[vagrant@localhost sg]$
+
+see ~ changed to sg
+
+Ansible configuration file
+---------------------------------
+By default ansible looks for a configuration file in the following director : /etc/ansible/ansible.cfg
+
+However, we can have our own ansible config file in any directory : /home/rajesh/ansible.cfg
+
+or, it could evne be in sub-directory :/home/rajesh/sg/ansible.cfg
+
+The /etc/ansible/ansible.cfg is called Global Configuration file.
+It is provided by ANSIBLE and most of the options are commented.
+
+We need to look into two groups [default] and [privilege_escalation] group and change the parameters as per needs.
+
+The order in which ansible uses the config file is as follows :
+1. If we have a config file in current directory it will use that or
+2. It will use the default/global config file
+
+e.g.
+to rename the ansible config file : mv ansible.cfg myansible.cfg
+ansible --version 
+--> it's taking global config file
+cd ..
+ansible --version -> displays home directory config file
+
+-----------------------------------------
+
+Observe inventory file provided by ansible
+
+[vagrant@localhost ~]$ # Observe inventory file provided by ansible
+[vagrant@localhost ~]$ cat /etc/ansible/hosts
+
+
+----------------------------------------
+ansible --help
+or, ansible --help | less
+
+
+ansible [hosts] {-i <inventory>} --list-hosts
+
+ansible all --list-hosts
+
+ansible localhost -m ping
+ansible all -m ping
+ansible local -m ping
+ansible servera -m ping
+
+ansible-doc -l | wc -l  ->> count the number of modules
+
+ansible localhost -m  command -a "id" --> -a is argument, id is command -> gives user identification details
+ansible localhost -m  command -a "uptime" -> up tells the up time i.e. from which time the server is up and running.
+"set" command : display environmental variables
+
+ansible localhost -m command -a "set" --> not work
+ansible localhost -m shell -a "set" -> use shell command
+
+cat ansible.cfg > output  --> copy the content to output file
+
+the command with >, < use shell module, not command module
+
+ansible-doc copy
+
+ansible locahost -m copy -a "src=./output dest=/tmp"
+
+in copy module content and source option are mutually exclusive'
+
+
+---------------------------------------------
+
+service module --> control services on remote hosts.
+
+systemctl status sshd  -> d symbolise daemon process
+
+systemctl status crond -> used to schedule task
+systemctl stop crond
+
+ansible localhost -m service -a "name=crond state=started"
+ansible localhost -m service -a "name=crond state=stopped"
+
+-------------------------------------------------
+
+File module
+
+ansible-doc file
+
+ansible locahost -m file -a "path=/tmp/output mode=0400"
+
+ansible locahost -m file -a "path=/tmp/output mode=0777"
+
+-----------------------------------------------------
+
+VI Editor
+
+VI Modes                                                             
+======================                                               
+VI editor works in two modes:                                        
+1. the command mode (default)                                        
+2. insert mode                                                       
+                                                                     
+to change over to insert mode, press the letter 'i' on the           
+keyboard . Observe, -- INSERT -- at the bottom of the screen.        
+It is a confirmation that we are in Insert mode.                     
+                                                                     
+To change over, from insert mode to Command mode, just press         
+the ESC. If not sure, press the Esc ket more than once.              
+                                                                     
+Save Work                                                            
+===============                                                      
+Once you have done with the typing work, you can save and ...        
+In command mode                                                      
+                                                                     
+ :w     To write                                                     
+ :wq    To write and quit. i.e. come out of the editor.              
+ :w <file> write to the file. (Similar to 'Save as')                 
+ :q! Quit without saving                                             
+                                                                     
+Editing Commands                                                     
+=================                                                    
+  X/[Del]  Delete a character                                        
+  dw       Delete a word                                             
+  dd       Delete a line                                             
+  D        Delete from current cursor                                
+                                                                     
+  Note : The command can be Quantified using a number (e.g. 5dw)     
+                                                                     
+  u       undo                                                       
+                                                                     
+Copy and paste                                                       
+=================                                                    
+  yy       To yank line.                                             
+  p or P   To paste.      
+
+to remove the highlighter from the vi
+=====================================
+
+nohlsearch
+-----------------------------------------------------
+
+DAY 2
+=========================================
+
+SSH config file
+
+ sudo vi /etc/ssh/sshd_config --> edit the file as "PasswordAuthentication yes"
+ sudo systemctl restart sshd 
+ After this we can ping with any name : ansible local -i theHosts -m ping 
+
+*to check if it is working or not
+   ssh vagrant@localhost
+ if it is asking for password : it means the permission set is correct
+
+ After this we can ping with any name : ansible local -i theHosts -m ping 
+
+ man ssh-copy id
+
+Note : avoid spaces in path name
+
+which python
+python
+
+  file_loc = "C:\new_folder\temp\ramya.txt" 
+  print file_loc
+  output: ew_folder       emp\john.txt         \n - newline character, \t - tab space  
+
+----------------------------------------------------
+Playbooks (written with YAML)
+-------------
+
+YAML : Ain't Markup language
+lists like arrays                            
+
+beginning of doc : three DASH (---)
+end of doc : three DOT (...)
+
+~ -> indicates home directory
+file start with dot (.) is hidden file
+vimrc - vi editor 
+
+~/.vimrc
+
+install vim enhanced tool
+ sudo yum install -y vim-enhanced
+
+can write string in single quotes, double quotes, without quotes. best practices : double quotes
+
+lists
+------------
+e.g
+-colors:
+ - red
+ - green
+ - blue
+
+inline :
+
+fruits : [apple, banana, cherry]
+
+comment line use #
+
+verifying yAML syntax
+ python -c 'import yaml, sys; print yaml.load(sys.stdin)' < <filename.yml> 
+
+e.g.  python -c 'import yaml, sys; print yaml.load(sys.stdin)' < hello2.yml
+
+hello2.yml
+-----------
+---
+# Our first Hello Wolrd playbook
+- name : First Play
+  hosts : localhost
+  tasks :
+  - debug : msg="Hello from ANSIBLE"
+  - debug : msg="Testing Once Again..."
+Note : use vim editor (vim hello2.yml), donot use vi editor(view editor) since it opens the file in view mode not in edit mode
+
+
+
+setup module : ansible localhost -m setup | less
+
+Play : play serves 
+
+execute playbook command
+ansible-playbook <playbook file>
+
+debug module -> ansible-doc debug --> prints statement during execution
+                msg is used to display default message i.e. helloworld
+
+ansible-doc -s debug  --> -s gives the small description
+
+check playbook syntax : ansible-playbook --syntax-check <playbook_file>
+step by step execution : ansible-playbook --step <playbook_file>
+dry-run : ansible-playbook -C <playbook_file>
+
+
+create file :  vim ~/.vimrc  ->: vim used since we have enhanced the vi editor using ->sudo yum install -y vim-enhanced -> text will be of different different color
+open file : cat ~/.vimrc
+
+----------------------------------
+
+Variables in playbook
+----------------------
+
+e.g
+
+vars :
+  user : mukhtar
+
+e.g. {{ variable_name }}
+
+user module --> ansible-doc user
+
+user details is available in /etc/passwd --> cat /etc/passwd
+can't  create two user bu same name.
+
+user add command used to create a user
+user del command used to delete/remove a user
+
+sudo userdel salman
+cat /etc/passwd
+
+if user already exist, playbook will not change it or create the duplicate one. since it has idempotent behaviour (i.e if exist, no change.. if doesnot exist, change happen)
+
+
+ansible-playbook <playbook_file> -e "var=value"  ---> it will override the user variable value in playbook.
+
+Instead varaible we can use array
+
+----------------------
+Register variable
+
+We can capture the output of a command using the 'register' statement.
+
+in vi editor we can execute any linux coomand by typing :!<command>  --> switch back to vi using enter key
+
+Any tasks in playbbok fails, it will terminate the play book execution.
+This issue can be resolved by handler.
+
+check whether a weserver is existing or not --> systemctl status httpd
+
+
+- name : Install a package and print the result         
+  hosts : localhost                                     
+  tasks :                                               
+   - name : Installing the tree package                 
+     yum :                                              
+      name : tree                                       
+      state : latest                                    
+     register : install_result                          
+                                                        
+   - debug : msg="Display the installation result ..."  
+   - debug : var=install_result     
+
+- service:
+    name: httpd
+    state: started
+
+systemctl status httpd
+
+man wget : non interactive network downloader       
+wget http://localhost/ravi.html  --> sudo install wget (used to install the wget)
+
+/var/www/html/index.html
+
+ansible localhost -m setup | less --> to search for hostname type /hostname and press enter key
+
+after hosts in playbook you can write --> ignoreerror : yes
+
+
+- lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.0\.1'
+    line: '127.0.0.1 localhost'
+    owner: root
+    group: root
+    mode: 0644
+
+-------------------------------------
+to execute task conditionally
+
+when : condition variable
+
+e.g register : status1
+
+    when : status1.rc == 0
+when clause is the last module of the task.
+
+to supress the [Gathering facts activity]
+
+below hosts in playbook type --> gather_facts : no  --> by default it execute the default module
+                                 ignore_errors : yes
+
+--------------------------------------
+to iterate
+ user :
+  name : "{{ item }}"
+  with_items :
+   - amar
+   - akbar
+   - anthony
+
+to delete user in cmder --> sudo deluser amar
+             
+ansible_all_ipv4_addresses
+
+ansible_facts.ansible_all_ipv4_addresses
+ansible_os_family
+"ansible_pkg_mgr
+
+wget work only when web server is up and running
+
+----------------------------------------------------
+
+DAY 3
+====================================================
+
+To restart the vagrant in cmder
+
+Go to the folder containing vagrantFile.
+Give command --> vagrant up
+and then check the ssh configuration --> vagrant ssh-config
+and then run this command --> ssh vagrant@<IP Address> -p <port number> -i <identity file>
+
+
+-----------------------------------------------------
+
+Conditionals
+------------------------
+achieved by association "when" keyword with a "conditional task"
+
+in (operator) is used to check a pattern in string
+
+Boolean :True/False
+
+and (operator), or (operator)
+
+Handlers  
+-------------------------
+
+To make changes to the machine, in order to reflect that changes machine should be restarted.
+
+To notify to the handler, it uses the name attribute.
+
+Note : when there is change i.e changes variable > 0, the only the handler is getting invoked.
+
+Tags
+-------------------------
+ ansible-playbook <playbook.yml> --tags 'tag_name'
+ ansible-playbook <playbook.yml> --skip-tags 'tag_name'
+ ansible-playbook <playbook.yml> --tags 'untagged'
+ ansible-playbook <playbook.yml> --tags 'tagged'
+ ansible-playbook <playbook.yml> --tags 'all'
+
+e.g
+ansible-playbook ex_tags.yml --skip-tags first
+
+Managing Inclusions
+----------------------
+include_vars  <to specify the file to be included>
+include <to specify the yml file which has tasks to be included>
+|
+--> include_tasks --> for dynamic inclusion (or) import_tasks --> for static inclusion.
+
+to uninstall the package : sudo yum remove tree
+
+ cat /etc/passwd | grep '^salman'
+
+----------------------------------------------------
+
+[vagrant@localhost playbooks]$ cat ansible.cfg              
+[defaults]                                                  
+inventory     = hosts                                       
+remote_user   = vagrant                                     
+                                                            
+[privilege_escalation]                                      
+become = True                                               
+become_method = sudo                                        
+become_user = root                                          
+become_ask_pass = False                                     
+[vagrant@localhost playbooks]$ cat hosts                    
+[local]                                                     
+localhost ansible_ssh_pass=vagrant ansible_ssh_user=vagrant 
+servera                                                     
+[vagrant@localhost playbooks]$ cat register_ex.yml
+---
+- name : Install a package and print the result
+  hosts : localhost
+  tasks :
+   - name : Installing the tree package
+     yum :
+      name : tree
+      state : latest
+     register : install_result
+
+   - debug : msg="Display the installation result ..."
+   - debug : var=install_result
+
+--------------------------------------------------------
+to get the zip file containing all the created file
+go to --> cd ~ --> ls -->cd ~                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+tar -tvf ansible-training.tar.gz
+
+/home/vagrant/ansible-training.tar.gz
+
+scp (secure copy used to transfer data from virtual box to windows)
+scp -p <port no. e.g. 2222> -i <dentitiy file> <username e.g. vagrant>@<IP address e.g. 127.0.0.1>:
+/home/vagrant/ansible-training.tar.gz
+-------------------------------------------------------
+
+Roles
+-------------
+ansible-galaxy
+
+e.g. ansible-galaxy search 'install git'
+e.g. ansible-galaxy info alikins.git
+
+to remove directory : rm -r <directory_name>  --> r option id for recursive i.e. if any files is inside the dir, 
+                                                  that will als be deleted recursively
+                      rmdir <directory_name>
+
+role name --> e.g. davidkarban.git
+
+ansible-galaxy install davidkarban.git -p roles
+tree roles
+
+To use the above roles:
+[vagrant@localhost playbooks]$ cat ex_use_role.yml   
+---                                                  
+- name:  Using davidkarban.git role playbook         
+  hosts: localhost                                   
+  roles:                                             
+    - davidkarban.git  
+
+
+                              
+which git
+sudo yum remove -y git
+which git
+git
+ansible-palybook ex_use_role.yml  
+-------------------------------
+Creating the customized role
+--------------------------------
+ansible-galaxy init --help
+
+e.g. ansible-galaxy init --offline -f myenv   --> myenv is a directory name
+     tree myenv/
+cat myenv/vars/main.yml
+cat myenv/tasks/main.yml
+
+
+
+                           
+                                                            
+                                                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
